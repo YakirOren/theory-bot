@@ -106,13 +106,7 @@ async def echo(ctx , arg):
 
 @bot.command(pass_context=True)
 async def join_voice(ctx):
-	"""
-	this function handels the "join_voice" commmand 
-	when the join_voice command is called the bot will join the voice command that of the ctx user
-	playing sound does not work 
-
-	"""
-	
+    """this function handels the "join_voice" commmand when the join_voice command is called the bot will join the voice command that of the ctx user playing sound does not work """
     channel = ctx.message.author.voice.channel
     if not channel:
         await ctx.send("You are not connected to a voice channel")
@@ -187,8 +181,9 @@ async def theory(ctx):
 	url = "http://www.meteoria.co.il/repository/question/"+str(question_number)
 	response = requests.get(url)
 	
-
-
+	soup = BeautifulSoup(response.text, "html.parser")
+	for i in soup.findAll('li'):
+		await ctx.channel.send(i)
 
 bot.loop.create_task(change_status())
 bot.run(token)
