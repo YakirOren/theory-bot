@@ -8,6 +8,10 @@ import datetime
 import subprocess
 import youtube_dl
 import asyncio
+import requests
+import bs4
+import random
+from bs4 import BeautifulSoup
 
 STATUS_DELAY = 1
 BYTES_SIZE = 32
@@ -174,6 +178,16 @@ async def change_status():
 	    for msg in messages:
 	        await bot.change_presence(activity=discord.Game(name=msg))
 	        await asyncio.sleep(STATUS_DELAY)
+
+@bot.command(pass_context= True)
+async def theory(ctx):
+
+	question_number = random.randint(1, 1500)
+
+	url = "http://www.meteoria.co.il/repository/question/"+str(question_number)
+	response = requests.get(url)
+	
+
 
 
 bot.loop.create_task(change_status())
