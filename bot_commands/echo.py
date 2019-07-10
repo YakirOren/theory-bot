@@ -8,7 +8,7 @@ class echo_command(commands.Cog):
 		self.bot = bot
 
 	@commands.command()
-	async def echo(ctx, arg):
+	async def echo(self, ctx, arg):
 		"""
 		this function handles the "echo" command
 		when the echo command is called the bot will send the received arg back to the ctx user
@@ -16,7 +16,7 @@ class echo_command(commands.Cog):
 		await ctx.channel.send(arg)
 
 	@echo.error
-	async def echo_error(ctx, error):
+	async def echo_error(self, ctx, error):
 		"""
 		this function handles what happens when a error occurs in the echo function
 		"""

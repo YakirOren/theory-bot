@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 import subprocess
-
 RED = 0xFF0000
 GREEN = 0x00ff00
+
 
 class cmd_command(commands.Cog):
 	def __init__(self, bot):
@@ -11,9 +11,9 @@ class cmd_command(commands.Cog):
 
 	@commands.is_owner()
 	@commands.command(pass_context=True)
-	async def cmd(self,ctx ,*, arg):
+	async def cmd(self, ctx, *, arg):
 		"""
-		this function handles the "cmd" command 
+		this function handles the "cmd" command
 		when the cmd command is called the bot using subprocess the bot will do the given command in the host pc shell
 		the user can give in the arg a cmd command and the bot will take it and run it
 		"""
@@ -25,7 +25,7 @@ class cmd_command(commands.Cog):
 		await ctx.channel.send(embed=embed)
 
 	@cmd.error
-	async def cmd_error(self,ctx, error):
+	async def cmd_error(self, ctx, error):
 		"""
 		this function handles what happens when a error occurs in the cmd function
 		"""
@@ -34,4 +34,4 @@ class cmd_command(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(cmd_command(bot))
+	bot.add_cog(cmd_command(bot))

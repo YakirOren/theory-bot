@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-
 RED = 0xFF0000
+
 
 class quit_command(commands.Cog):
 	def __init__(self, bot):
@@ -11,7 +11,7 @@ class quit_command(commands.Cog):
 	@commands.command(pass_context=True)
 	async def quit(self, ctx):
 		"""
-		this function handles the "quit" command 
+		this function handles the "quit" command
 		when the quit command is called the bot will disconnect from discord and go offline
 		"""
 		await ctx.channel.send("bye!")
@@ -27,4 +27,4 @@ class quit_command(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(quit_command(bot))
+	bot.add_cog(quit_command(bot))

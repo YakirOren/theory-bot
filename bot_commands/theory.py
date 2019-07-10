@@ -30,7 +30,7 @@ class theory_command(commands.Cog):
 		correct_answer = 0
 		question_number = random.randint(1, 1500)
 
-		question_image_url = "http://www.meteoria.co.il/Content/img/"+str(question_number)+".jpg"
+		question_image_url = "http://www.meteoria.co.il/Content/img/" + str(question_number) + ".jpg"
 		url = THEORY_URL + str(question_number)
 
 		async with aiohttp.ClientSession() as session:
@@ -42,9 +42,9 @@ class theory_command(commands.Cog):
 			embed = discord.Embed(title=question, description="", color=GREEN)
 			try:
 				embed.set_thumbnail(url=question_image_url)
-			except:
+			except Exception:
 				pass
-			
+
 			for i in soup.findAll('li')[-4:]:
 				answer_number += 1
 				if 'data-corrent="1"' in str(i):
