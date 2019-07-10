@@ -8,10 +8,11 @@ import datetime
 import subprocess
 import youtube_dl
 import asyncio
-import requests
+import aiohttp
 import bs4
 import random
 from bs4 import BeautifulSoup
+import re
 
 STATUS_DELAY = 1
 BYTES_SIZE = 32
@@ -175,15 +176,54 @@ async def change_status():
 
 @bot.command(pass_context= True)
 async def theory(ctx):
-
+	answer_number = 0
+	correct_answer = 0
 	question_number = random.randint(1, 1500)
-
 	url = "http://www.meteoria.co.il/repository/question/"+str(question_number)
-	response = requests.get(url)
-	
-	soup = BeautifulSoup(response.text, "html.parser")
-	for i in soup.findAll('li'):
-		await ctx.channel.send(i)
+
+	async with aiohttp.ClientSession() as session:
+		html = await fetch(session, url)
+
+		soup = BeautifulSoup(html, "html.parser")
+
+		question = soup.findAll('h1')
+		question = re.findall("<h1>.+</h1>" , str(question))[0][4 : -5]
+		embed = discord.Embed(title=question, description="",color=0x00ff00)
+
+		for i in soup.findAll('li'):
+			if 'data-corrent="0"' in str(i):
+				answer_number += 1
+				embed.add_field(name= answer_number , value= re.findall("<span>.+</span>" , str(i))[0][6 : -7] + "\n"  ,inline=True)
+			if 'data-corrent="1"' in str(i):
+				answer_number += 1
+				correct_answer = answer_number
+				embed.add_field(name= answer_number , value= re.findall("<span>.+</span>" , str(i))[0][6 : -7] + "\n" ,inline=True)
+
+		msg = await ctx.channel.send(embed=embed)
+
+		def check(reaction, user):
+			return user == ctx.author and str(reaction.emoji) == '👍'
+
+		await msg.add_reaction('👍')
+		# await msg.add_reaction('')
+		# await msg.add_reaction('')
+		# await msg.add_reaction('')
+
+		try:
+			reaction, user = await bot.wait_for('reaction_add', timeout=60.0 , check = check)
+
+		except asyncio.TimeoutError:
+			await ctx.channel.send('👎')
+		else:
+			await ctx.channel.send('😉')
+
+
+
+
+async def fetch(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
 
 bot.loop.create_task(change_status())
 bot.run(token)
