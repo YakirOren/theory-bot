@@ -9,16 +9,16 @@ class quit_command(commands.Cog):
 
 	@commands.is_owner()
 	@commands.command(pass_context=True)
-	async def quit(ctx):
+	async def quit(self, ctx):
 		"""
 		this function handles the "quit" command 
 		when the quit command is called the bot will disconnect from discord and go offline
 		"""
 		await ctx.channel.send("bye!")
-		await bot.close()
+		await self.bot.close()
 
 	@quit.error
-	async def quit_error(ctx, error):
+	async def quit_error(self, ctx, error):
 		"""
 		this function handles what happens when a error occurs in the quit function
 		"""
