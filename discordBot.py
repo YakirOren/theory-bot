@@ -14,7 +14,7 @@ import random
 from bs4 import BeautifulSoup
 import re
 
-startup_extensions = ["clear"]
+startup_extensions = ["bot_commands.clear"]
 STATUS_DELAY = 1
 BYTES_SIZE = 32
 SEND_TIMES = 3
