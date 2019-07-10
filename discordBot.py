@@ -14,6 +14,7 @@ import random
 from bs4 import BeautifulSoup
 import re
 
+startup_extensions = ["clear"]
 STATUS_DELAY = 1
 BYTES_SIZE = 32
 SEND_TIMES = 3
@@ -49,27 +50,6 @@ async def on_message(message):
 
 	await bot.process_commands(message)
 
-
-@bot.command(pass_context=True)
-async def clear(ctx , number: int):
-	"""
-	this function handels the "clear" commmand 
-	when the clear command is called the bot delete the given amout of msgs from the ctx channel
-	"""
-
-	all_traffic_channel = bot.get_channel(593823748852023352)
-	await ctx.channel.purge(limit = number + 1)
-	await all_traffic_channel.send(f"```\n\ncommand: {ctx.message.content} was used in channel: {ctx.channel}\nuser: {ctx.author}\nwith name: {ctx.author.name}```")
-
-
-@clear.error
-async def clear_error(ctx, error):
-	"""
-	this function handels what happes when a error occurs in the clear function
-	"""
-	if isinstance(error, discord.ext.commands.BadArgument):
-		error_embed = discord.Embed(title="ERROR.", description="something went wrong" , color=0xFF0000)
-		await ctx.channel.send(embed=error_embed)
 
 
 @bot.command(pass_context=True)
@@ -215,10 +195,18 @@ async def theory(ctx):
 
 
 
-
 async def fetch(session, url):
     async with session.get(url) as response:
         return await response.text()
+
+
+if __name__ == "__main__":
+	for extension in startup_extensions:
+		try:
+			bot.load_extension(extension)
+		except Exception as e:
+			exc = '{}: {}'.format(type(e).__name__, e)
+			print('Failed to load extension {}\n{}'.format(extension, exc))
 
 
 bot.loop.create_task(change_status())
