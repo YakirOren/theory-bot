@@ -9,6 +9,10 @@ class clear_command(commands.Cog):
 
 	@commands.command()
 	async def clear(self, ctx, number: int):
+		"""
+		this function handles the "clear" command
+		when the clear command is called the bot delete the given amount of msgs from the ctx channel
+		"""
 		await ctx.channel.purge(limit=number + 1)
 
 	@clear.error
