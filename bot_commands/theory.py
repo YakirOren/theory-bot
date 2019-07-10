@@ -19,6 +19,8 @@ TWO_EMOJI = '2⃣'
 THREE_EMOJI = '3⃣'
 FOUR_EMOJI = '4⃣'
 
+ANSWER_DICT = {ONE_EMOJI: 1, TWO_EMOJI: 2, THREE_EMOJI: 3, FOUR_EMOJI: 4}
+
 
 class theory_command(commands.Cog):
 	def __init__(self, bot):
@@ -61,12 +63,18 @@ class theory_command(commands.Cog):
 				reaction, user = await self.bot.wait_for(
 					'reaction_add',
 					timeout=TIME_TO_ANSWER,
-					check=lambda reaction, user: user is ctx.author
+					check=lambda reaction, user: user is ctx.author and str(reaction) in ANSWER_DICT.keys()
 				)
 			except asyncio.TimeoutError:
 				await ctx.channel.send(THUMBS_DOWN_EMOJI)
 			else:
-				await ctx.channel.send('😉')
+				try:
+					if ANSWER_DICT[str(reaction)] == correct_answer:
+						await ctx.channel.send('correct answer!')
+					else:
+						await ctx.channel.send('wrong answer!')
+				except Exception:
+					pass
 
 	@theory.error
 	async def theory_error(self, ctx, error):
