@@ -190,28 +190,24 @@ async def theory(ctx):
 		question = re.findall("<h1>.+</h1>" , str(question))[0][4 : -5]
 		embed = discord.Embed(title=question, description="",color=0x00ff00)
 
-		for i in soup.findAll('li'):
-			if 'data-corrent="0"' in str(i):
-				answer_number += 1
-				embed.add_field(name= answer_number , value= re.findall("<span>.+</span>" , str(i))[0][6 : -7] + "\n"  ,inline=True)
+		for i in soup.findAll('li')[-4:]:
+			answer_number += 1
 			if 'data-corrent="1"' in str(i):
-				answer_number += 1
 				correct_answer = answer_number
-				embed.add_field(name= answer_number , value= re.findall("<span>.+</span>" , str(i))[0][6 : -7] + "\n" ,inline=True)
-
+			embed.add_field(name= answer_number , value= re.findall("<span>.+</span>" , str(i))[0][6 : -7] + "\n" ,inline=True)
 		msg = await ctx.channel.send(embed=embed)
 
 		def check(reaction, user):
 			return user == ctx.author and str(reaction.emoji) == '👍'
 
-		await msg.add_reaction('👍')
-		# await msg.add_reaction('')
-		# await msg.add_reaction('')
-		# await msg.add_reaction('')
+		await msg.add_reaction('1⃣')
+		await msg.add_reaction('2⃣')
+		await msg.add_reaction('3⃣')
+		await msg.add_reaction('4⃣')
 
 		try:
 			reaction, user = await bot.wait_for('reaction_add', timeout=60.0 , check = check)
-
+			print(reaction)
 		except asyncio.TimeoutError:
 			await ctx.channel.send('👎')
 		else:
