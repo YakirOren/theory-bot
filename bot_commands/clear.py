@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+RED = 0xFF0000
 
 class clear_command(commands.Cog):
 	def __init__(self, bot):
@@ -9,8 +10,8 @@ class clear_command(commands.Cog):
 	@commands.command()
 	async def clear(self, ctx , number: int):
 		"""
-		this function handels the "clear" commmand 
-		when the clear command is called the bot delete the given amout of msgs from the ctx channel
+		this function handles the "clear" command 
+		when the clear command is called the bot delete the given amount of msgs from the ctx channel
 		"""
 
 		all_traffic_channel = self.bot.get_channel(593823748852023352)
@@ -21,10 +22,10 @@ class clear_command(commands.Cog):
 	@clear.error
 	async def clear_error(self, ctx, error):
 		"""
-		this function handels what happes when a error occurs in the clear function
+		this function handles what happens when a error occurs in the clear function
 		"""
 		if isinstance(error, discord.ext.commands.BadArgument):
-			error_embed = discord.Embed(title="ERROR.", description="something went wrong" , color=0xFF0000)
+			error_embed = discord.Embed(title="ERROR.", description="something went wrong", color=RED)
 			await ctx.channel.send(embed=error_embed)
 
 
