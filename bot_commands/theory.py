@@ -41,7 +41,7 @@ class theory_command(commands.Cog):
 			question = re.findall("<h1>.+</h1>", str(question))[0][4:-5]
 			embed = discord.Embed(title=question, description="", color=GREEN)
 			try:
-				embed.set_thumbnail(url=question_image_url)
+				embed.set_image(url=question_image_url)
 			except Exception:
 				pass
 
@@ -61,7 +61,7 @@ class theory_command(commands.Cog):
 				reaction, user = await self.bot.wait_for(
 					'reaction_add',
 					timeout=TIME_TO_ANSWER,
-					check=lambda user, reaction: user == ctx.author and str(reaction.emoji) == THUMBS_UP_EMOJI
+					check=lambda reaction, user: user is ctx.author
 				)
 			except asyncio.TimeoutError:
 				await ctx.channel.send(THUMBS_DOWN_EMOJI)
