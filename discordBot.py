@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import asyncio
-import re
 
 COMMANDS_FOLDER = "bot_commands"  # Don't add slash in the end
 BOT_COMMANDS = [
