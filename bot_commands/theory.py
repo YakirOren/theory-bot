@@ -26,8 +26,7 @@ class theory_command(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@commands.command()
-	async def theory(self, ctx):
+	async def make_question(self, ctx):
 		answer_number = 0
 		correct_answer = 0
 		question_number = random.randint(1, 1500)
@@ -72,21 +71,31 @@ class theory_command(commands.Cog):
 					if ANSWER_DICT[str(reaction)] == correct_answer:
 						await ctx.channel.send('correct answer!')
 					else:
-						await ctx.channel.send('wrong answer!')
+						await ctx.channel.send(f'wrong answer! the correct answer is {correct_answer}')
 				except Exception:
 					pass
 
+	async def fetch(self, session, url):
+		async with session.get(url) as response:
+			return await response.text()
+
+	@commands.command()
+	async def theory_test(self, ctx, number_of_questions: int):
+		for question in range(number_of_questions):
+			await self.make_question(ctx)
+
+	@commands.command()
+	async def theory(self, ctx):
+		await self.make_question(ctx)
+
+	@theory_test.error
 	@theory.error
-	async def theory_error(self, ctx, error):
+	async def question_error(self, ctx, error):
 		"""
 		this function handles what happens when a error occurs in the theory function
 		"""
 		error_embed = discord.Embed(title="ERROR.", description=str(error), color=RED)
 		await ctx.channel.send(embed=error_embed)
-
-	async def fetch(self, session, url):
-		async with session.get(url) as response:
-			return await response.text()
 
 
 def setup(bot):
