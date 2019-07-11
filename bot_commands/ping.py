@@ -3,6 +3,8 @@ from discord.ext import commands
 import subprocess
 RED = 0xFF0000
 GREEN = 0x00FF00
+COMMAND_DELAY = 30
+NUMBER_OF_TIMES = 1  # The number of time a user can ping in the delay time.
 
 
 class ping_command(commands.Cog):
@@ -10,7 +12,7 @@ class ping_command(commands.Cog):
 		self.bot = bot
 
 	@commands.command()
-	@commands.cooldown(1, 30, commands.BucketType.user)
+	@commands.cooldown(NUMBER_OF_TIMES, COMMAND_DELAY, commands.BucketType.user)
 	async def ping(self, ctx, arg: str):
 		"""
 		this function handles the "ping" command
