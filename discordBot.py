@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+from pymongo import MongoClient
 
 COMMANDS_FOLDER = "bot_commands"  # Don't add slash in the end
 BOT_COMMANDS = [
@@ -26,10 +27,43 @@ CONSOLE_CHANNEL_ID = 593823748852023352
 bot = commands.Bot(PREFIX)
 bot.remove_command('help')
 
+# Database options, this is using MongoDB
+USE_DATABASE = True
+link_to_connection = 'mongodb://localhost:27017'
+database_name = 'bot'
+collection_name = 'moderation'
+client = MongoClient(link_to_connection)
+db = client[database_name]
+collection = db[collection_name]
+
 
 @bot.event
 async def on_ready():
 	print(f'logged in as {bot.user}')
+	if USE_DATABASE:
+		print('Inserting data to DB, this may take some time...')
+		channels = []
+		for channel in bot.get_all_channels():
+			if str(channel.type) == 'text':
+				msg = await channel.history(limit=1).flatten()
+				if not collection.find_one({'channel_id': str(channel.id)}):
+					last_msg = ''
+					if len(msg) > 0:
+						last_msg = {
+							'content': str(msg[0].content),
+							'author': str(msg[0].author),
+							'author_id': str(msg[0].author.id),
+							'msg_time': str(msg[0].created_at),
+						}
+					channels.append({
+						'channel_id': str(channel.id),
+						'server_name': str(channel.guild),
+						'channel_name': str(channel.name),
+						'last_msg': last_msg
+					})
+		if len(channels) > 0:
+			collection.insert_many(channels)
+		print('Finished inserting to the DB!')
 	# game = discord.Game("Minecraft")
 	# await bot.change_presence(activity=game)
 
