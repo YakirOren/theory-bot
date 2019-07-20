@@ -10,6 +10,7 @@ THEORY_URL = "http://www.meteoria.co.il/repository/question/"
 
 GREEN = 0x00ff00
 RED = 0xFF0000
+PURPLE = 0xcc0acc
 
 # Emojis
 THUMBS_UP_EMOJI = '👍'
@@ -26,7 +27,7 @@ class theory_command(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
-	async def make_question(self, ctx):
+	async def make_question(self, ctx, score_embed=None, mode=None):
 		answer_number = 0
 		correct_answer = 0
 		question_number = random.randint(1, 1500)
@@ -45,7 +46,7 @@ class theory_command(commands.Cog):
 				embed.set_image(url=question_image_url)
 			except Exception:
 				pass
-
+			embed.set_footer(text=f"שאלה מספר {question_number}")
 			for i in soup.findAll('li')[-4:]:
 				answer_number += 1
 				if 'data-corrent="1"' in str(i):
@@ -69,9 +70,16 @@ class theory_command(commands.Cog):
 			else:
 				try:
 					if ANSWER_DICT[str(reaction)] == correct_answer:
-						await ctx.channel.send('correct answer!')
+						if mode != "test":
+							await ctx.channel.send('correct answer!')
+						else:
+							return (1, score_embed)
 					else:
-						await ctx.channel.send(f'wrong answer! the correct answer is {correct_answer}')
+						if mode != "test":
+							await ctx.channel.send(f'wrong answer! the correct answer is {correct_answer}')
+						else:
+							score_embed.add_field(name=question, value=f"the correct answer is {correct_answer} you have answered {ANSWER_DICT[str(reaction)]}")
+							return(0, score_embed)
 				except Exception:
 					pass
 
@@ -81,8 +89,18 @@ class theory_command(commands.Cog):
 
 	@commands.command()
 	async def theory_test(self, ctx, number_of_questions: int):
+		points = 0
+		score_embed = discord.Embed(title="score", description=None, color=PURPLE)
 		for question in range(number_of_questions):
-			await self.make_question(ctx)
+			try:
+				returned = await self.make_question(ctx, score_embed=score_embed, mode="test")
+				points += returned[0]
+				score_embed = returned[1]
+			except Exception as e:
+				print(e)
+
+		score_embed.add_field(name="correct", value=f"you answered correct on {points} / {number_of_questions}")
+		await ctx.channel.send(embed=score_embed)
 
 	@commands.command()
 	async def theory(self, ctx):
