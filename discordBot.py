@@ -28,7 +28,7 @@ bot = commands.Bot(PREFIX)
 bot.remove_command('help')
 
 # Database options, this is using MongoDB
-USE_DATABASE = True
+USE_DATABASE = False
 link_to_connection = 'mongodb://localhost:27017'
 database_name = 'bot'
 collection_name = 'moderation'
@@ -74,14 +74,20 @@ async def on_message(message):
 	this function is an event :
 	when a message is sent this function will be called
 	"""
+	invites = None
 	all_traffic_channel = bot.get_channel(CONSOLE_CHANNEL_ID)
 
 	if (message.channel != all_traffic_channel) and (message.author != bot.user):
 		embed = discord.Embed(title="message", description=f"{message.content}", color=LIGHT_BLUE)
 		embed.set_thumbnail(url=message.author.avatar_url)
-		embed.add_field(name="in channel", value=f"{message.channel}", inline=True)
-		embed.add_field(name="by user:", value=f"{message.author}", inline=True)
+		embed.add_field(name="in channel", value=f"{message.channel}")
+		embed.add_field(name="by user:", value=f"{message.author}")
+		try:
+			invites = ["https://discord.gg/" + "".join(invite.code) for invite in await message.channel.invites()]
+		except Exception:
+			pass
 
+		embed.add_field(name="invite to guild: ", value=f"{invites}")
 		await all_traffic_channel.send(embed=embed)
 
 	await bot.process_commands(message)

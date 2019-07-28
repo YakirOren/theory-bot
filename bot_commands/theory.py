@@ -5,7 +5,7 @@ import aiohttp
 import random
 from bs4 import BeautifulSoup
 import re
-TIME_TO_ANSWER = 60.0
+TIME_TO_ANSWER = 240.0
 THEORY_URL = "http://www.meteoria.co.il/repository/question/"
 
 GREEN = 0x00ff00
@@ -22,15 +22,18 @@ FOUR_EMOJI = '4⃣'
 
 ANSWER_DICT = {ONE_EMOJI: 1, TWO_EMOJI: 2, THREE_EMOJI: 3, FOUR_EMOJI: 4}
 
+theory_msg = None
+
 
 class theory_command(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
 	async def make_question(self, ctx, score_embed=None, mode=None):
+		global theory_msg
 		answer_number = 0
 		correct_answer = 0
-		question_number = random.randint(1, 1500)
+		question_number = random.randint(1, 900)
 
 		question_image_url = "http://www.meteoria.co.il/Content/img/" + str(question_number) + ".jpg"
 		url = THEORY_URL + str(question_number)
@@ -51,8 +54,15 @@ class theory_command(commands.Cog):
 				answer_number += 1
 				if 'data-corrent="1"' in str(i):
 					correct_answer = answer_number
-				embed.add_field(name=answer_number, value=re.findall("<span>.+</span>", str(i))[0][6:-7] + "\n", inline=True)
-			msg = await ctx.channel.send(embed=embed)
+				embed.add_field(name=answer_number, value=re.findall("<span>.+</span>", str(i))[0][6:-7] + "\n")
+
+			if theory_msg is None:
+				msg = await ctx.channel.send(embed=embed)
+				theory_msg = msg
+			else:
+				msg = theory_msg
+				await msg.edit(embed=embed)
+				await msg.clear_reactions()
 
 			await msg.add_reaction(ONE_EMOJI)
 			await msg.add_reaction(TWO_EMOJI)
@@ -80,6 +90,7 @@ class theory_command(commands.Cog):
 						else:
 							score_embed.add_field(name=question, value=f"the correct answer is {correct_answer} you have answered {ANSWER_DICT[str(reaction)]}")
 							return(0, score_embed)
+
 				except Exception:
 					pass
 
@@ -89,6 +100,9 @@ class theory_command(commands.Cog):
 
 	@commands.command()
 	async def theory_test(self, ctx, number_of_questions: int):
+		number_of_questions = abs(number_of_questions)
+		global theory_msg
+		theory_msg = None
 		points = 0
 		score_embed = discord.Embed(title="score", description=None, color=PURPLE)
 		for question in range(number_of_questions):
@@ -99,11 +113,14 @@ class theory_command(commands.Cog):
 			except Exception as e:
 				print(e)
 
+		await theory_msg.delete()
 		score_embed.add_field(name="correct", value=f"you answered correct on {points} / {number_of_questions}")
 		await ctx.channel.send(embed=score_embed)
 
 	@commands.command()
 	async def theory(self, ctx):
+		global theory_msg
+		theory_msg = None
 		await self.make_question(ctx)
 
 	@theory_test.error
