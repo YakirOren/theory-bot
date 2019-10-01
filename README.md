@@ -1,6 +1,8 @@
 # Theory bot
-A nice python bot for the Israeli theory test??!!?
+A nice python bot for the Israeli theory test
 
+this repo is a linux version of the orignal discord bot repo 
+https://github.com/YakirOren/theory-bot
 
 ## Commands:
 - clear:
