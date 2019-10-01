@@ -1,5 +1,5 @@
 # Theory bot
-A nice python bot for the Israeli theory test??!!?
+A nice python bot for the Israeli theory test
 
 
 ## Commands:
