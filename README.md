@@ -50,3 +50,5 @@ https://github.com/YakirOren/theory-bot
       - Parameters: number of questions.
       - Permissions: Everyone.
     
+   -example images:
+      ![alt text](https://discordapp.com/channels/450725919020023813/450725919678791681/628520945564385290.png)
