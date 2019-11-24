@@ -65,10 +65,10 @@ async def change_status():
 	and will change the text that is displayed under the bot name in discord
 	"""
 	await bot.wait_until_ready()
-	while bot.is_ready():
-		for msg in STATUS_MESSAGES:
-			await bot.change_presence(activity=discord.Game(name=msg))
-			await asyncio.sleep(STATUS_DELAY)
+	# while bot.is_ready():
+		# for msg in STATUS_MESSAGES:
+		# 	await bot.change_presence(activity=discord.Game(name=msg))
+		# 	await asyncio.sleep(STATUS_DELAY)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # Theory bot
 A nice python bot for the Israeli theory test
 
-this repo is a linux version of the orignal discord bot repo 
+this repo is a Linux version of the original discord bot repo  
 https://github.com/YakirOren/theory-bot
 
 ## Commands:
@@ -11,7 +11,7 @@ https://github.com/YakirOren/theory-bot
   - Permissions: Everyone.
 
 - echo:
-  - Description: Echos back the given string.
+  - Description: Echoes back the given string.
   - Parameters: A string to echo.
   - Permissions: Everyone.
 
@@ -29,7 +29,7 @@ https://github.com/YakirOren/theory-bot
   - Description: Will close the bot.
   - Parameters: None.
   - Permissions: Bot owner.
-  
+
 - Voice channel commands:
   - join:
     - Description: Will make the bot join the channel your currently in.
@@ -42,11 +42,10 @@ https://github.com/YakirOren/theory-bot
       the user by default will have 240 seconds to answer (this number can be changed).
     - Parameters: None.
     - Permissions: Everyone.
-    
+
    - theory_test:
       - Description: Will send a theory question to the channel by default will have 25 seconds delay(this number can be changed).
         the user by default will have 240 seconds to answer (this number can be changed).
-        after the user have answerd the bot will send another question to the channel.
+        after the user have answered the bot will send another question to the channel.
       - Parameters: number of questions.
       - Permissions: Everyone.
-    

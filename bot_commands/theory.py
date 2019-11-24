@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import re
 import pickle
 import os
+
 TIME_TO_ANSWER = 240.0
 THEORY_URL = "http://www.meteoria.co.il/repository/question/"
 
@@ -24,7 +25,6 @@ FOUR_EMOJI = '4⃣'
 
 ANSWER_DICT = {ONE_EMOJI: 1, TWO_EMOJI: 2, THREE_EMOJI: 3, FOUR_EMOJI: 4}
 
-theory_file_exist = False  # checks if the pickle file for this user exist
 COMMAND_DELAY = 25
 NUMBER_OF_TIMES = 1  # The number of time a user can ping in the delay time.
 
@@ -34,7 +34,17 @@ class theory_command(commands.Cog):
 		self.bot = bot
 
 	async def make_question(self, ctx, score_embed=None, mode=None):
-		global theory_file_exist
+		"""
+		This function will make a question and will send it to chat.
+		First the function gets the question from the Meteoria data base,
+		parses it and sends it to the ctx chat as an embed.
+
+		This function also has an optional parameter called 'mode'
+		this parameter changes the function behavior:
+
+		When mode = 'test'
+		the function will
+		"""
 		answer_number = 0
 		correct_answer = 0
 		question_number = random.randint(1, 900)
@@ -58,38 +68,42 @@ class theory_command(commands.Cog):
 				answer_number += 1
 				if 'data-corrent="1"' in str(i):
 					correct_answer = answer_number
-				embed.add_field(name=answer_number, value=re.findall("<span>.+</span>", str(i))[0][6:-7] + "\n")
+				embed.add_field(name=answer_number, value=re.findall("<span>.+</span>", str(i))[0][6:-7] + "\n", inline=False)
 
-			try:
-				f = open(ctx.author + "theory_file.pickle")
-				f.close()
-			except Exception:
-				theory_file_exist = False
 
-			if theory_file_exist is False:
+			author_id = ctx.author.id
+			if self.msg_file_exits(author_id) is False:
 				msg = await ctx.channel.send(embed=embed)
-				with open(ctx.author + "theory_file.pickle", 'wb') as file:
-					pickle.dump(msg, file)
-
-				theory_file_exist = True
+				with open(str(author_id) + "msg_id.txt", 'w') as file:
+					print(author_id)
+					print("w")
+					file.write(str(msg.id))
 			else:
-				with open(ctx.author + "theory_file.pickle", 'rb') as file:
-					msg = pickle.load(file)
-				await msg.edit(embed=embed)
-				await msg.clear_reactions()
+				with open(str(author_id) + "msg_id.txt", 'r') as file:
+					msg_id = file.read()
+					print("r")
 
+					async for old_message in ctx.channel.history(limit=50): # getting the old message from chat
+					    if old_message.id == int(msg_id):
+					       msg = old_message
+
+				await msg.edit(embed=embed) # replacing the old message with our new one
+				await msg.clear_reactions() # clearing the Emojis because the answer from the last question is still there and if we will not clear them its going to automaticly answer the new question with the old answer
+
+			# adding the Emojis back after we cleared them, so the user can answer.
 			await msg.add_reaction(ONE_EMOJI)
 			await msg.add_reaction(TWO_EMOJI)
 			await msg.add_reaction(THREE_EMOJI)
 			await msg.add_reaction(FOUR_EMOJI)
 
 			try:
+				# when a reaction is added the bot will check if the added reaction is from the user who reqested the test
 				reaction, user = await self.bot.wait_for(
 					'reaction_add',
 					timeout=TIME_TO_ANSWER,
-					check=lambda reaction, user: user is ctx.author and str(reaction) in ANSWER_DICT.keys()
+					check=lambda reaction, user: user is ctx.author and str(reaction) in ANSWER_DICT.keys() # the bot also checks if the reaction added is the from our ANSWER_DICT
 				)
-			except asyncio.TimeoutError:
+			except asyncio.TimeoutError: # if the time has run out the bot will send a THUMBS_DOWN_EMOJI.
 				await ctx.channel.send(THUMBS_DOWN_EMOJI)
 			else:
 				try:
@@ -115,15 +129,26 @@ class theory_command(commands.Cog):
 	def is_dm_channel(self, ctx):
 		return ctx.message.guild is not None
 
-	@commands.check(is_dm_channel)
+	def msg_file_exits(self, author_id):
+		try:
+			f = open(str(author_id) + "msg_id.txt")
+			f.close()
+			return True
+		except Exception:
+			return False
+
+	def delete_msg_file(self, ctx):
+		author_id = ctx.author.id
+		if self.msg_file_exits(author_id):
+			os.remove(str(author_id) + "msg_id.txt") # deleting the file with the id of the message
+
 	@commands.command()
 	@commands.cooldown(NUMBER_OF_TIMES, COMMAND_DELAY, commands.BucketType.user)
 	async def theory_test(self, ctx, number_of_questions: int):
+
 		number_of_questions = abs(number_of_questions)
-		global theory_file_exist
-		theory_file_exist = False
 		points = 0
-		score_embed = discord.Embed(title="score", description=None, color=PURPLE)
+		score_embed = discord.Embed(title=str(ctx.author) +"\'s score", description=None, color=PURPLE, inline=True)
 		for question in range(number_of_questions):
 			try:
 				returned = await self.make_question(ctx, score_embed=score_embed, mode="test")
@@ -132,11 +157,9 @@ class theory_command(commands.Cog):
 			except Exception as e:
 				print(e)
 
-		with open(ctx.author + "theory_file.pickle", 'rb') as file:  # reading from the pickle file the question embed
-			await pickle.load(file).delete()
-			os.remove("theory_file.pickle")
+		self.delete_msg_file(ctx)
 
-		score_embed.add_field(name="correct", value=f"you answered correct on {points} / {number_of_questions}")
+		score_embed.add_field(name="correct", value=f"{str(ctx.author)} answered correct on {points} / {number_of_questions}", inline=True)
 		await ctx.channel.send(embed=score_embed)
 
 	@commands.command()
@@ -144,9 +167,9 @@ class theory_command(commands.Cog):
 	async def theory(self, ctx):
 		"""
 		"""
-		global theory_file_exist
-		theory_file_exist = False
+		self.delete_msg_file(ctx)
 		await self.make_question(ctx)
+		self.delete_msg_file(ctx)
 
 	@theory_test.error
 	@theory.error
@@ -156,6 +179,7 @@ class theory_command(commands.Cog):
 		"""
 		error_embed = discord.Embed(title="ERROR.", description=str(error), color=RED)
 		await ctx.channel.send(embed=error_embed)
+
 
 
 def setup(bot):
