@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import re
 import pickle
 import os
+import traceback
 
 TIME_TO_ANSWER = 240.0
 THEORY_URL = "http://www.meteoria.co.il/repository/question/"
@@ -75,17 +76,12 @@ class theory_command(commands.Cog):
 			if self.msg_file_exits(author_id) is False:
 				msg = await ctx.channel.send(embed=embed)
 				with open(str(author_id) + "msg_id.txt", 'w') as file:
-					print(author_id)
-					print("w")
 					file.write(str(msg.id))
 			else:
 				with open(str(author_id) + "msg_id.txt", 'r') as file:
 					msg_id = file.read()
-					print("r")
 
-					async for old_message in ctx.channel.history(limit=50): # getting the old message from chat
-					    if old_message.id == int(msg_id):
-					       msg = old_message
+					msg = await ctx.channel.fetch_message(int(msg_id))
 
 				await msg.edit(embed=embed) # replacing the old message with our new one
 				await msg.clear_reactions() # clearing the Emojis because the answer from the last question is still there and if we will not clear them its going to automaticly answer the new question with the old answer
@@ -116,7 +112,7 @@ class theory_command(commands.Cog):
 						if mode != "test":
 							await ctx.channel.send(f'wrong answer! the correct answer is {correct_answer}')
 						else:
-							score_embed.add_field(name=question, value=f"the correct answer is {correct_answer} you have answered {ANSWER_DICT[str(reaction)]}")
+							score_embed.add_field(name=question, value=f"the correct answer is {correct_answer} you have answered {ANSWER_DICT[str(reaction)]}", inline=False)
 							return(0, score_embed)
 
 				except Exception:
@@ -145,10 +141,15 @@ class theory_command(commands.Cog):
 	@commands.command()
 	@commands.cooldown(NUMBER_OF_TIMES, COMMAND_DELAY, commands.BucketType.user)
 	async def theory_test(self, ctx, number_of_questions: int):
+		author_id = ctx.author.id
+
+		self.delete_msg_file(ctx)
 
 		number_of_questions = abs(number_of_questions)
+		if number_of_questions > 30:
+			raise ValueError("number is too big")
 		points = 0
-		score_embed = discord.Embed(title=str(ctx.author) +"\'s score", description=None, color=PURPLE, inline=True)
+		score_embed = discord.Embed(title=str(ctx.author) +"\'s score", description=None, color=PURPLE, inline=False)
 		for question in range(number_of_questions):
 			try:
 				returned = await self.make_question(ctx, score_embed=score_embed, mode="test")
@@ -157,10 +158,18 @@ class theory_command(commands.Cog):
 			except Exception as e:
 				print(e)
 
-		self.delete_msg_file(ctx)
+		score_embed.add_field(name="correct", value=f"{str(ctx.author)} answered correct on {points} / {number_of_questions}", inline=False)
 
-		score_embed.add_field(name="correct", value=f"{str(ctx.author)} answered correct on {points} / {number_of_questions}", inline=True)
-		await ctx.channel.send(embed=score_embed)
+		if self.msg_file_exits(author_id):
+			with open(str(author_id) + "msg_id.txt", 'r') as file:
+				msg_id = file.read()
+			msg = await ctx.channel.fetch_message(int(msg_id))
+			await msg.edit(embed=score_embed)
+			await msg.clear_reactions()
+
+			self.delete_msg_file(ctx)
+		else:
+			await ctx.channel.send(embed=score_embed)
 
 	@commands.command()
 	@commands.cooldown(NUMBER_OF_TIMES, COMMAND_DELAY, commands.BucketType.user)
@@ -179,6 +188,14 @@ class theory_command(commands.Cog):
 		"""
 		error_embed = discord.Embed(title="ERROR.", description=str(error), color=RED)
 		await ctx.channel.send(embed=error_embed)
+
+		if isinstance(ctx, commands.CommandInvokeError):
+			self.delete_msg_file(ctx)
+			traceback_error_embed = discord.Embed(title="ERROR.", description=traceback.format_exc(), color=RED)
+			await ctx.channel.send(embed=traceback_error_embed)
+
+		# if isinstance(ctx, commands.CommandOnCooldown()):
+
 
 
 

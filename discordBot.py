@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+import os
 
 COMMANDS_FOLDER = "bot_commands"  # Don't add slash in the end
 BOT_COMMANDS = [
@@ -30,6 +31,7 @@ bot.remove_command('help')
 @bot.event
 async def on_ready():
 	print(f'logged in as {bot.user}')
+	guilds = bot.guilds
 	# game = discord.Game("Minecraft")
 	# await bot.change_presence(activity=game)
 
@@ -57,6 +59,17 @@ async def on_message(message):
 		await all_traffic_channel.send(embed=embed)
 
 	await bot.process_commands(message)
+
+
+@bot.event
+async def on_message_delete(message):
+	author_id = message.author.id
+	try:
+		with open(str(author_id) + "msg_id.txt", 'r') as file:
+			msg_id = file.read()
+			msg = await message.channel.fetch_message(int(msg_id))
+	except Exception:
+		os.remove(str(author_id) + "msg_id.txt")
 
 
 async def change_status():
