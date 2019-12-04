@@ -1,13 +1,16 @@
 import discord
 from discord.ext import commands
 RED = 0xFF0000
-
+CMD_USERS = ["yakirLaptop#4906", "YakirOren#1424"]
 
 class quit_command(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@commands.is_owner()
+	def is_cmd_user(ctx):
+		return str(ctx.author) in CMD_USERS
+
+	@commands.check(is_cmd_user)
 	@commands.command(pass_context=True)
 	async def quit(self, ctx):
 		"""
