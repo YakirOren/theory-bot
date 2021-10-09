@@ -1,8 +1,6 @@
 # Theory bot
 # [Invite](https://discord.com/api/oauth2/authorize?client_id=624613109922791424&permissions=8&scope=bot)
-A nice python bot for the Israeli theory test
-
-This repo is a Linux version of the [original](https://github.com/YakirOren/theory-bot) discord bot repo
+A Discord bot written in Python for the Israeli theory test
 
 
 Commands can be changed and loaded by changing the BOT_COMMANDS list
@@ -20,7 +18,6 @@ BOT_COMMANDS = [
 
 
 ## Main Commands:
- :warning: being rewritin in newer versions.
   - theory:
     - Will send a theory question to the channel by default will have 25 seconds delay(this number can be changed).
       the user by default will have 240 seconds to answer (this number can be changed).
@@ -67,7 +64,6 @@ besides the main commands the bot has some other helpful commands:
   - Permissions: Bot owner.
 
 # Voice channel commands:
- :warning: NOT FULLY IMPLEMNTED 
   - join:
     - Description: Will make the bot join the channel your currently in.
     - Parameters: None.
